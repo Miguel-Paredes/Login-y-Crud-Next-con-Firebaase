@@ -39,6 +39,7 @@ export default function Page (){
         setisLoading(true)
         try {
             await singIn(user)
+            toast(`!Bienvenido¡`, {duration: 5000, icon: '😎'})
         } catch (error: any) {
             toast.error(
                 // Mostramos el mensaje de error

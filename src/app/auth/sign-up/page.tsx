@@ -2,11 +2,12 @@
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CreateUser, UpdateUser } from '@/lib/firebase'
+import { CreateUser, setDocument, UpdateUser } from '@/lib/firebase'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { Title } from '@/components/ui'
+import { User } from '@/interfaces'
 
 export default function Page(){
     const [isLoading, setisLoading] = useState<boolean>(false)
@@ -43,8 +44,12 @@ export default function Page(){
     const onSubmit = async (user: z.infer<typeof formSchema>) => {
         setisLoading(true)
         try {
-            await CreateUser(user)
+            let res = await CreateUser(user)
             await UpdateUser({displayName: user.name})
+            // ? Hacemos que el uid tenga el valor del id de la base de datos
+            user.uid = res.user.uid
+            // ! Creamos el usuario 
+            await createUserInDB(user as User)
         } catch (error: any) {
             toast.error(
                 // Mostramos el mensaje de error
@@ -57,6 +62,26 @@ export default function Page(){
         }
     }
     
+    // ! Creacion de la informacion del usuario en la BDD
+    const createUserInDB = async (user: User) => {
+
+        // * Creacion de la coleccion y del registro de la informacion del usuario
+        const path = `users/${user.uid}`
+        setisLoading(true)
+        try {
+            delete user.password
+            await setDocument(path, user)
+            toast(`!Bienvenido¡ ${user.name}`, {duration: 5000, icon: '😎'})
+        } catch (error : any) {
+            toast.error(
+                error.message,
+                {duration: 5000}
+            )
+        }finally{
+            setisLoading(false)
+        }
+    }
+
     return(
         <div className='min-h-screen flex items-center justify-center'>
             <div className='w-full'>
