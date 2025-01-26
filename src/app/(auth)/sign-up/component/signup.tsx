@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { Title } from '@/components/ui'
 import { User } from '@/interfaces'
 
-export default function Page(){
+export default function SignUp(){
     const [isLoading, setisLoading] = useState<boolean>(false)
     
     // ! Información necesaria para el registro de credenciales
@@ -44,7 +44,7 @@ export default function Page(){
     const onSubmit = async (user: z.infer<typeof formSchema>) => {
         setisLoading(true)
         try {
-            let res = await CreateUser(user)
+            const res = await CreateUser(user)
             await UpdateUser({displayName: user.name})
             // ? Hacemos que el uid tenga el valor del id de la base de datos
             user.uid = res.user.uid
@@ -113,7 +113,7 @@ export default function Page(){
                                 placeholder="Usuario"
                             />
                             <div className='flex justify-center'>
-                                <span className='text-red-500 w-max rounded-lg p-2'>{errors.email?.message}</span>
+                                <span className='text-red-500 w-max rounded-lg pt-1'>{errors.email?.message}</span>
                             </div>
                             <label className="text-[#283629] text-sm font-semibold m-2 text-center" htmlFor="password">Password: </label>
                             <input 
@@ -126,7 +126,7 @@ export default function Page(){
                                 placeholder="Contraseña"
                                 />
                             <div className='flex justify-center'>
-                                <span className='text-red-500 w-max rounded-lg p-2'>{errors.password?.message}</span>
+                                <span className='text-red-500 w-max rounded-lg pt-1'>{errors.password?.message}</span>
                             </div>
                             <div className='flex justify-center mt-2'>
                                 <button
@@ -136,7 +136,7 @@ export default function Page(){
                                     {isLoading ? <span className="loader"></span> : 'Registrarse'}
                                 </button>
                                 <Link
-                                    href={'/auth'}
+                                    href={'/'}
                                     className="bg-blue-400 text-white mx-2 rounded-lg hover:underline hover:bg-black hover:text-white flex text-center justify-center w-1/3"
                                 >
                                     Iniciar Sesión

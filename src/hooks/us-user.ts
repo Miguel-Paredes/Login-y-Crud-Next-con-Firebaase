@@ -3,19 +3,28 @@ import { User } from "@/interfaces"
 import { auth, getDocument } from "@/lib/firebase"
 import { onAuthStateChanged } from "firebase/auth"
 import { DocumentData } from "firebase/firestore"
+import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 export const useUser = () => {
     const [User, setUser] = useState<User | undefined | DocumentData>(undefined)
+    const pathName = usePathname()
+    const router = useRouter()
+    // ? Rutas a las que no puede acceder si NO esta iniciado sesion
+    const protectedRoutes = ["/dashboard"]
+    // Validacion para que no acceda a esas rutas
+    const isInProtectedRoutes = protectedRoutes.includes(pathName)
+    
+    
     // ! Funcion para obtener la informacion del usuario
     const getUserFromBD = async ( uid : string ) => {
         const path = `users/${uid}`
         try {
-            let res = await getDocument(path)
+            const res = await getDocument(path)
             setUser(res)
             setInLoacalStorage('user', res)
         } catch (error) {
-            
+            console.log(error)
         }
     }
     useEffect(() => {
@@ -31,7 +40,8 @@ export const useUser = () => {
                 getUserFromBD(authUser.uid)
             }
         } else {
-            console.log('User is signed out')
+            // ? Si el usuario no esta logeado
+            if(isInProtectedRoutes) return router.push('/')
         }
       })
 

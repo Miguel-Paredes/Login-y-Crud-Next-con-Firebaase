@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { Title } from '@/components/ui'
 
-export default function Page (){
+export default function Login (){
 
     const [isLoading, setisLoading] = useState<boolean>(false)
     
@@ -70,7 +70,7 @@ export default function Page (){
                                 placeholder="Usuario"
                             />
                             <div className='flex justify-center'>
-                                <span className='text-red-500 w-max rounded-lg p-2'>{errors.email?.message}</span>
+                                <span className='text-red-500 w-max rounded-lg pt-1'>{errors.email?.message}</span>
                             </div>
                             <label className="text-[#283629] text-sm font-semibold m-2 text-center" htmlFor="password">Password: </label>
                             <input 
@@ -83,7 +83,7 @@ export default function Page (){
                                 placeholder="Contraseña"
                                 />
                             <div className='flex justify-center'>
-                                <span className='text-red-500 w-max rounded-lg p-2'>{errors.password?.message}</span>
+                                <span className='text-red-500 w-max rounded-lg pt-1'>{errors.password?.message}</span>
                             </div>
                             <div className='flex justify-center mt-2'>
                                 <button
@@ -93,10 +93,18 @@ export default function Page (){
                                     {isLoading ? <span className="loader"></span> : 'Ingresar'}
                                 </button>
                                 <Link
-                                    href={'/auth/sign-up'}
+                                    href={'/sign-up'}
                                     className="bg-blue-400 text-white mx-2 rounded-lg hover:underline hover:bg-black hover:text-white flex text-center justify-center w-1/3"
                                 >
                                     Registrarse
+                                </Link>
+                            </div>
+                            <div className='flex justify-center mt-2'>
+                                <Link
+                                    href={'/forgot-password'}
+                                    className="text-gray-400 mx-2 rounded-lg hover:underline flex text-center justify-center w-max"
+                                >
+                                    ¿Olvidaste tu contraseña?
                                 </Link>
                             </div>
                         </div>
