@@ -6,6 +6,7 @@ import {
   LogOut,
   User,
   ImagePlus,
+  LoaderCircle,
 } from "lucide-react";
 import { Button } from "./ui";
 import {
@@ -18,14 +19,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useUser } from "@/hooks/us-user";
-import { useState, useEffect } from "react"; // Importa useEffect
+import { useState, useEffect } from "react"; // No necesitas useRef
 import { singOut, UpdateDocument } from "@/lib/firebase";
 import { FileToBase64 } from "@/actions";
 import Image from "next/image";
+import { RxUpdate } from "react-icons/rx";
+import toast from "react-hot-toast";
 
 export function ProfileDropdown() {
   const user = useUser();
   const [image, setImage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Efecto para cargar la imagen del localStorage al montar el componente
   useEffect(() => {
@@ -92,9 +96,12 @@ export function ProfileDropdown() {
 
   // Función para elegir una imagen
   const chooseImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsLoading(true);
     const file = event.target.files?.[0];
     if (!file) return;
-
+    if (image) {
+      await handleDeleteImage();
+    }
     try {
       const base64 = await FileToBase64(file);
       const imageUrl = await uploadImageToCloudinary(base64);
@@ -102,8 +109,12 @@ export function ProfileDropdown() {
       setImage(imageUrl);
       await UpdateDocument(`users/${user?.uid}`, { image: imageUrl });
       localStorage.setItem("userImage", imageUrl); // Guardar la imagen en el localStorage
-    } catch (error) {
+    } catch (error: any) {
+      toast.error(error.message, { duration: 5000 });
       console.error("Error al subir la imagen:", error);
+    } finally {
+      setIsLoading(false);
+      event.target.value = "";
     }
   };
 
@@ -131,28 +142,35 @@ export function ProfileDropdown() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel className="text-center">
-          <div className="flex justify-center">
-            <div>
-              <input
-                id="files"
-                type="file"
-                className="hidden"
-                onChange={chooseImage}
-              />
-              <label htmlFor="files">
-                <div className="w-[40px] h-[28px] cursor-pointer rounded-lg text-white bg-slate-950 hover:bg-slate-600 flex justify-center items-center">
-                  <ImagePlus className="w-[18px] h-[18px]" />
+          {!image &&
+            (isLoading ? (
+              <LoaderCircle className="h-14 w-14 animate-spin m-auto mb-3" />
+            ) : (
+              <>
+                <div className="flex justify-center">
+                  <div>
+                    <input
+                      id="files"
+                      type="file"
+                      className="hidden"
+                      onChange={chooseImage}
+                    />
+                    <label htmlFor="files">
+                      <div className="w-[40px] h-[28px] cursor-pointer rounded-lg text-white bg-slate-950 hover:bg-slate-600 flex justify-center items-center">
+                        <ImagePlus className="w-[18px] h-[18px]" />
+                      </div>
+                    </label>
+                  </div>
                 </div>
-              </label>
-            </div>
-          </div>
+              </>
+            ))}
           {image && (
             <Image
               src={image}
-              width={20}
-              height={20}
+              width={1000}
+              height={1000}
               alt="Profile"
-              className="w-16 h-16 rounded-full mx-auto mt-2"
+              className="object-cover w-20 h-20 rounded-full m-auto"
             />
           )}
           {user?.name}
@@ -173,13 +191,29 @@ export function ProfileDropdown() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        {image && (
-          <DropdownMenuItem onClick={handleDeleteImage}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Eliminar imagen
-          </DropdownMenuItem>
-        )}
-        <button onClick={() => singOut()}>
+        <DropdownMenuLabel className="text-center">
+          {image && (
+            <div className="flex justify-start">
+              <div>
+                <input
+                  id="files"
+                  type="file"
+                  className="hidden"
+                  onChange={chooseImage}
+                />
+                <label htmlFor="files">
+                    <div className="flex justify-center">
+                      <RxUpdate className="mr-2 h-4 w-4" />
+                      <p className=" ml-2 font-normal">
+                        Actualizar Imagen
+                      </p>
+                    </div>
+                </label>
+              </div>
+            </div>
+          )}
+        </DropdownMenuLabel>
+        <button onClick={() => singOut()} className="w-full">
           <DropdownMenuItem>
             <LogOut className="mr-2 h-4 w-4" />
             Cerrar Sesión

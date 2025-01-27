@@ -7,6 +7,7 @@ import { useState } from 'react'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { Title } from '@/components/ui'
+import { LoaderCircle } from 'lucide-react'
 
 export default function Login (){
 
@@ -90,7 +91,7 @@ export default function Login (){
                                     type="submit"
                                     className="bg-green-400 text-white mx-2 rounded-lg hover:underline hover:bg-black hover:text-white flex text-center justify-center w-1/3"
                                 >
-                                    {isLoading ? <span className="loader"></span> : 'Ingresar'}
+                                    {isLoading ? <LoaderCircle className='w-6 h-6 animate-spin'/> : 'Ingresar'}
                                 </button>
                                 <Link
                                     href={'/sign-up'}
