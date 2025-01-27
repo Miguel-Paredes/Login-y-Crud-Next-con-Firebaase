@@ -15,7 +15,7 @@ export default function RootLayout({
   const user = useUser()
   const pathName = usePathname()
   // ? Rutas a las que no puede acceder si esta iniciado sesion
-  const authRoutes = ["/", "/sign-up"]
+  const authRoutes = ["/", "/sign-up", "/forgot-password"]
   // Validacion para que no acceda a esas rutas
   const isInAuthRoutes = authRoutes.includes(pathName)
   // Redireccionamos a dashboard si esta logeado

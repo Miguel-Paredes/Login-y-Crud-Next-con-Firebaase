@@ -1,7 +1,9 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { createUserWithEmailAndPassword, getAuth, sendPasswordResetEmail, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, getDoc, getFirestore, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, getDoc, getFirestore, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -21,6 +23,7 @@ export const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app)
+export const storage = getStorage(app)
 
 // ! Funciones del Auth
 // todo: Inicio de sesion con el correo y la contraseña
@@ -57,7 +60,26 @@ export const setDocument = ( path: string, data : any ) => {
   return setDoc(doc(db,path), data)
 }
 
+// todo: Actualizamos la informacion
+export const UpdateDocument = ( path: string, data : any ) => {
+  return updateDoc(doc(db,path), data)
+}
+
 // todo: Busqueda de informacion
 export const getDocument = async ( path: string ) => {
   return (await getDoc(doc(db,path),)).data()
 }
+
+// ! Funciones de almacenamiento de imagenes
+// todo: Subir imagen y obtener la url
+// * Cuando este habilidato el storage en firebase
+// export const uploadBase64 = async ( path : string, base64 : string) => {
+//   return (
+//     // Subimos la imagen a firebase
+//     await uploadString(ref(storage, path), base64, 'data_url').
+//     // Retornamos la url de la imagen
+//     then( async () => {
+//       return await getDownloadURL(ref(storage, path))
+//     })
+//   )
+// }

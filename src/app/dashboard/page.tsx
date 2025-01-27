@@ -1,11 +1,15 @@
-'use client'
-import { singOut } from "@/lib/firebase";
+import { NavBar } from "@/components/ui"
+import type { Metadata } from "next"
+
+export const metadata: Metadata ={
+    title: "Dashboard",
+    description: "Gestiona tus productos",
+}
 
 export default function Page (){
     return(
         <div>
-            <h1>Dashboard</h1>
-            <button onClick={()=>singOut()}>Cerrar Sesión</button>
+            <NavBar/>
         </div>
     )
 }
