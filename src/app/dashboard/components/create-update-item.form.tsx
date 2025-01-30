@@ -23,6 +23,8 @@ import { useUser } from "@/hooks/us-user";
 export function CreateUpdateItem() {
   const user = useUser()
   const [isLoading, setisLoading] = useState<boolean>(false);
+  // Para que se cierre el formulario una vez subido un producto
+  const [open, setOpen] = useState<boolean>(false)
 
   // ! Información necesaria para la creacion del producto
   const formSchema = z.object({
@@ -104,6 +106,10 @@ export function CreateUpdateItem() {
       item.image.url = imageUrl
       await addDocument(path, item);
       toast.success('Producto creado exitosamente')
+      // todo: Se sube la informacion y se cierra
+      setOpen(false)
+      // * Limpiamos el formulatio
+      form.reset()
     } catch (error: any) {
       toast.error(error.message, { duration: 5000 });
     } finally {
@@ -112,7 +118,8 @@ export function CreateUpdateItem() {
   };
 
   return (
-    <Dialog>
+    // ! Para manejar el cierre del formulario una vez se creo el producto
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="px-6">
           Agregar
