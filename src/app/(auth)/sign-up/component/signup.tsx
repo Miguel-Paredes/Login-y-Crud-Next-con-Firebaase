@@ -100,7 +100,7 @@ export default function SignUp(){
                                 placeholder="Miguel Paredes"
                             />
                             <div className='flex justify-center'>
-                                {/* <span className='text-red-500 w-max rounded-lg p-2'>{errors.name?.message}</span> */}
+                                <span className='text-red-500 w-max rounded-lg p-2'>{errors.name?.message}</span>
                             </div>
                             <label className="text-[#283629] text-sm font-semibold m-2 text-center" htmlFor="user">Usuario: </label>
                             <input 

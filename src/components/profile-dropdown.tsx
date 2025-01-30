@@ -98,9 +98,11 @@ export function ProfileDropdown() {
   const chooseImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsLoading(true);
     const file = event.target.files?.[0];
+    let update = false
     if (!file) return;
     if (image) {
       await handleDeleteImage();
+      update = true
     }
     try {
       const base64 = await FileToBase64(file);
@@ -109,6 +111,7 @@ export function ProfileDropdown() {
       setImage(imageUrl);
       await UpdateDocument(`users/${user?.uid}`, { image: imageUrl });
       localStorage.setItem("userImage", imageUrl); // Guardar la imagen en el localStorage
+      update ? toast.success('Imagen Actualizada') :toast.success('Imagen agregada')
     } catch (error: any) {
       toast.error(error.message, { duration: 5000 });
       console.error("Error al subir la imagen:", error);
@@ -137,7 +140,17 @@ export function ProfileDropdown() {
       <DropdownMenuTrigger asChild>
         <Button variant="outline">
           <span className="mr-2">Cuenta</span>
-          <CircleUserRound className="m-auto w-6 h-6" />
+          {image ? (
+            <Image
+              src={image}
+              width={1000}
+              height={1000}
+              alt="Profile"
+              className="object-cover w-6 h-6 rounded-full m-auto"
+            />
+          ) : (
+            <CircleUserRound className="m-auto w-6 h-6" />
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
@@ -154,6 +167,7 @@ export function ProfileDropdown() {
                       type="file"
                       className="hidden"
                       onChange={chooseImage}
+                      accept="image/png, image/webp, image/jpeg"
                     />
                     <label htmlFor="files">
                       <div className="w-[40px] h-[28px] cursor-pointer rounded-lg text-white bg-slate-950 hover:bg-slate-600 flex justify-center items-center">
@@ -200,14 +214,13 @@ export function ProfileDropdown() {
                   type="file"
                   className="hidden"
                   onChange={chooseImage}
+                  accept="image/png, image/webp, image/jpeg"
                 />
                 <label htmlFor="files">
-                    <div className="flex justify-center">
-                      <RxUpdate className="mr-2 h-4 w-4" />
-                      <p className=" ml-2 font-normal">
-                        Actualizar Imagen
-                      </p>
-                    </div>
+                  <div className="flex justify-center">
+                    <RxUpdate className="mr-2 h-4 w-4" />
+                    <p className=" ml-2 font-normal">Actualizar Imagen</p>
+                  </div>
                 </label>
               </div>
             </div>

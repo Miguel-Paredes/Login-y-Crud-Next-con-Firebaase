@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { createUserWithEmailAndPassword, getAuth, sendPasswordResetEmail, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, getDoc, getFirestore, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getFirestore, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -83,3 +83,9 @@ export const getDocument = async ( path: string ) => {
 //     })
 //   )
 // }
+
+// todo: Agregar la informacion a la coleccion de un usuario
+export const addDocument = ( path: string, data : any ) => {
+  data.createdAt = serverTimestamp()
+  return addDoc(collection(db,path), data)
+}
