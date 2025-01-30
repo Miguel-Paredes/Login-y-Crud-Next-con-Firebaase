@@ -9,22 +9,34 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { CirclePlus, LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addDocument, setDocument } from "@/lib/firebase";
-import { useState } from "react";
+import { addDocument, UpdateDocument } from "@/lib/firebase";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { ItemImage, Products } from "@/interfaces/product.interfaces";
 import DrapAndDropImage from "@/components/ui/drag-and-drop-images";
 import { useUser } from "@/hooks/us-user";
+import Image from "next/image";
 
-export function CreateUpdateItem() {
-  const user = useUser()
+interface CreateUpdateItemProps {
+  children: React.ReactNode;
+  itemToUpdate?: Products;
+  getItems: () => Promise<void>;
+}
+
+export function CreateUpdateItem({
+  children,
+  itemToUpdate,
+  getItems
+}: CreateUpdateItemProps) {
+  const user = useUser();
   const [isLoading, setisLoading] = useState<boolean>(false);
   // Para que se cierre el formulario una vez subido un producto
-  const [open, setOpen] = useState<boolean>(false)
+  const [open, setOpen] = useState<boolean>(false);
+  const [image, setImage] = useState<string>('')
 
   // ! Información necesaria para la creacion del producto
   const formSchema = z.object({
@@ -44,12 +56,12 @@ export function CreateUpdateItem() {
   // * Validación de datos
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: itemToUpdate ? itemToUpdate : {
       image: {} as ItemImage,
       name: "",
       price: undefined,
       units: undefined,
-    },
+    }
   });
 
   const { register, handleSubmit, formState, setValue } = form;
@@ -57,17 +69,23 @@ export function CreateUpdateItem() {
 
   // ? Actualizar el valor de la imagen
   const handleImage = (url: string) => {
-    let path = `${user?.uid}/${Date.now}`
-    setValue('image', {
+    let path =  itemToUpdate ? itemToUpdate.image.path : `${user?.uid}/${Date.now}`;
+    setValue("image", {
       url,
-      path
-    })
-  }
+      path,
+    });
+    setImage(url)
+  };
+
+  useEffect(() => {
+    if (itemToUpdate) setImage(itemToUpdate.image.url)
+  }, [open])
+  
 
   // todo: Envio de datos a la base de datos
   const onSubmit = async (item: z.infer<typeof formSchema>) => {
-    console.log(item)
-    createItem(item)
+    if(itemToUpdate)UpdateItem(item)
+    else createItem(item);
   };
 
   // Función para subir la imagen a Cloudinary usando la API
@@ -100,16 +118,45 @@ export function CreateUpdateItem() {
     setisLoading(true);
     try {
       // ? Subir la imagen
-      const base64 = item.image.url
-      const imagePath = item.image.path
-      const imageUrl = await uploadImageToCloudinary(base64)
-      item.image.url = imageUrl
+      const base64 = item.image.url;
+      const imageUrl = await uploadImageToCloudinary(base64);
+      item.image.url = imageUrl;
       await addDocument(path, item);
-      toast.success('Producto creado exitosamente')
+      toast.success("Producto creado exitosamente");
       // todo: Se sube la informacion y se cierra
-      setOpen(false)
+      setOpen(false);
       // * Limpiamos el formulatio
-      form.reset()
+      form.reset();
+      getItems();
+    } catch (error: any) {
+      toast.error(error.message, { duration: 5000 });
+    } finally {
+      setisLoading(false);
+    }
+  };
+  
+  // ! Actualizar el producto a la coleccion de un usuario
+  const UpdateItem = async (item: Products) => {
+    // * Accedemos al producto y lo actualizamos
+    const path = `users/${user?.uid}/products/${itemToUpdate?.id}`;
+    setisLoading(true);
+    try {
+      // ? Si la imagen cambia se debe de modificar en la bdd
+      if(itemToUpdate?.image.url !== item.image.url){
+        // ? Subir la imagen
+        const delImage = itemToUpdate?.image.url
+        DeleteImage(delImage)
+        const base64 = item.image.url;
+        const imageUrl = await uploadImageToCloudinary(base64);
+        item.image.url = imageUrl;
+      }
+      await UpdateDocument(path, item);
+      toast.success("Producto actualizado exitosamente");
+      // todo: Se sube la informacion y se cierra
+      setOpen(false);
+      // * Limpiamos el formulatio
+      form.reset();
+      getItems()
     } catch (error: any) {
       toast.error(error.message, { duration: 5000 });
     } finally {
@@ -117,18 +164,36 @@ export function CreateUpdateItem() {
     }
   };
 
+  const DeleteImage = async ( url : any ) => {
+    try {
+      const publicId = url.split("/").pop()?.split(".")[0] || "";
+
+      const response = await fetch("/api/delete", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ publicId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al eliminar la imagen");
+      }
+
+      const data = await response.json();
+      console.log("Imagen eliminada:", data);
+    } catch (error) {
+      
+    }
+  }
+
   return (
     // ! Para manejar el cierre del formulario una vez se creo el producto
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="px-6">
-          Agregar
-          <CirclePlus className="ml-2 w-[20px]" />
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Crear Producto</DialogTitle>
+          <DialogTitle> { itemToUpdate? 'Actualizar Producto' : 'Crear Producto' } </DialogTitle>
           <DialogDescription>
             Gestiona tu producto con la siguiente información
           </DialogDescription>
@@ -144,7 +209,31 @@ export function CreateUpdateItem() {
             >
               Imagen
             </label>
-            <DrapAndDropImage handleImage={handleImage}/>
+            {
+              image ? (
+                <div className="text-center">
+
+                  <Image
+                    src={image}
+                    width={1000}
+                    height={1000}
+                    alt="item-image"
+                    className="w-20 m-auto"
+                  />
+                  <Button
+                    type="button"
+                    onClick={()=>handleImage('')}
+                    disabled={isLoading}
+                    className="mt-2"
+                    >
+                    Remover Imagen
+                  </Button>
+                </div>
+              ):(
+
+                <DrapAndDropImage handleImage={handleImage} />
+              )
+            }
             <label
               className="text-[#283629] text-sm font-semibold m-2 text-center"
               htmlFor="name"
@@ -213,7 +302,7 @@ export function CreateUpdateItem() {
                 {isLoading && (
                   <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Crear
+                 { itemToUpdate? 'Actualizar' : 'Crear' } 
               </Button>
             </DialogFooter>
           </div>
