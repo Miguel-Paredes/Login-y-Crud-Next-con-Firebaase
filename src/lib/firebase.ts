@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { createUserWithEmailAndPassword, getAuth, sendPasswordResetEmail, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { addDoc, collection, doc, getDoc, getFirestore, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -88,4 +88,14 @@ export const getDocument = async ( path: string ) => {
 export const addDocument = ( path: string, data : any ) => {
   data.createdAt = serverTimestamp()
   return addDoc(collection(db,path), data)
+}
+
+// todo: Mostrar la informacion de una coleccion
+export const getColection = async ( colecctionName : string, querryArray?: any[] ) => {
+  // * Accedemos a una coleccion en especifico
+  const ref = collection(db, colecctionName)
+  // * Obtenemos toda la informacion del array
+  const q = querryArray ? query(ref, ...querryArray) : query(ref)
+    // * Mostramos la informacion empezando por el id y luego el resto
+  return ( await getDocs(q)).docs.map( (doc) => ( { id: doc.id, ...doc.data() } ) )
 }
