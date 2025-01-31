@@ -69,7 +69,7 @@ export function CreateUpdateItem({
 
   // ? Actualizar el valor de la imagen
   const handleImage = (url: string) => {
-    let path =  itemToUpdate ? itemToUpdate.image.path : `${user?.uid}/${Date.now}`;
+    const path =  itemToUpdate ? itemToUpdate.image.path : `${user?.uid}/${Date.now}`;
     setValue("image", {
       url,
       path,
@@ -128,6 +128,7 @@ export function CreateUpdateItem({
       // * Limpiamos el formulatio
       form.reset();
       getItems();
+      setImage('')
     } catch (error: any) {
       toast.error(error.message, { duration: 5000 });
     } finally {
@@ -157,6 +158,7 @@ export function CreateUpdateItem({
       // * Limpiamos el formulatio
       form.reset();
       getItems()
+      setImage('')
     } catch (error: any) {
       toast.error(error.message, { duration: 5000 });
     } finally {
@@ -182,8 +184,8 @@ export function CreateUpdateItem({
 
       const data = await response.json();
       console.log("Imagen eliminada:", data);
-    } catch (error) {
-      
+    } catch (error: any) {
+      toast.error(error.message, {duration:5000} )
     }
   }
 

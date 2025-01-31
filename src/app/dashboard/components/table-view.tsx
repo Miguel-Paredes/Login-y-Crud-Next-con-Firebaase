@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Products } from "@/interfaces/product.interfaces";
-import { SquarePen, Trash2 } from "lucide-react";
+import { LayoutList, SquarePen, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { CreateUpdateItem } from "./create-update-item.form";
 import { ConfirmDeliton } from "./confirm-delete";
@@ -24,6 +24,7 @@ interface TableViewProps {
 
 export function TableView({ items, getItems, DeleteItem, isLoading }: TableViewProps) {
   return (
+    <div className="hidden md:block">
     <Table>
       <TableHeader>
         <TableRow>
@@ -90,5 +91,15 @@ export function TableView({ items, getItems, DeleteItem, isLoading }: TableViewP
         ))}
       </TableBody>
     </Table>
+    {
+      !isLoading && items.length == 0 && 
+      <div className="text-gray-200 my-20">
+        <div className="flex justify-center">
+          <LayoutList className="w-[120px] h-[120px]"/>
+        </div>
+        <h2 className="text-center">No hay productos disponibles</h2>
+      </div>
+    }
+    </div>
   );
 }

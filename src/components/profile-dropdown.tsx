@@ -111,7 +111,8 @@ export function ProfileDropdown() {
       setImage(imageUrl);
       await UpdateDocument(`users/${user?.uid}`, { image: imageUrl });
       localStorage.setItem("userImage", imageUrl); // Guardar la imagen en el localStorage
-      update ? toast.success('Imagen Actualizada') :toast.success('Imagen agregada')
+      if(update) return toast.success('Imagen Actualizada')
+      else toast.success('Imagen agregada')
     } catch (error: any) {
       toast.error(error.message, { duration: 5000 });
       console.error("Error al subir la imagen:", error);
