@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { createUserWithEmailAndPassword, getAuth, sendPasswordResetEmail, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -98,4 +98,9 @@ export const getColection = async ( colecctionName : string, querryArray?: any[]
   const q = querryArray ? query(ref, ...querryArray) : query(ref)
     // * Mostramos la informacion empezando por el id y luego el resto
   return ( await getDocs(q)).docs.map( (doc) => ( { id: doc.id, ...doc.data() } ) )
+}
+
+// todo: Busqueda de informacion
+export const delDocument = ( path: string ) => {
+  return deleteDoc(doc(db,path))
 }
